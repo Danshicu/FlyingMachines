@@ -15,6 +15,15 @@ public class InputHandler
         }
     }
 
+    public Vector2 MouseInput
+    {
+        get
+        {
+            HandleMouseInput();
+            return _mouseInput;
+        }
+    }
+    
     public InputHandler()
     {
         _mouseInput = new Vector2();
@@ -25,5 +34,11 @@ public class InputHandler
     {
         _moveInput.x = Input.GetAxis("Horizontal");
         _moveInput.y = Input.GetAxis("Vertical");
+    }
+
+    private void HandleMouseInput()
+    {
+        _mouseInput.x = Input.GetAxis("Mouse X");
+        _mouseInput.y = Input.GetAxis("Mouse Y");
     }
 }
