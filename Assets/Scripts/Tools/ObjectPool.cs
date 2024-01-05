@@ -40,15 +40,10 @@ namespace Tools
       public bool TryGetFree(out Poolable item)
       {
       
-         if (HasFreeElement(out item))
-         {
-            item.SetActive(true);
-         }
-         else
+         if (!HasFreeElement(out item))
          {
             if (!_settings.IsExpandable) return false;
             item = CreateItem();
-            item.SetActive(true);
             _pool.Add(item);
          }
          return true;

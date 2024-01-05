@@ -1,33 +1,53 @@
 ﻿using System;
+using System.Collections;
+using NaughtyAttributes;
 using Tools;
 using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Weapons.Shootables
 {
-    [RequireComponent(typeof(Rigidbody))]
-    public class LaserProjectile :  Poolable, IShootable
+    
+    public class LaserProjectile :  Projectile, IDespawnableOnLifetime
     {
-        private Rigidbody _rigidbody;
+        
+        [SerializeField] private float _lifetime;
+        private Coroutine _despawnCoroutine;
         
         private void OnEnable()
         {
-            _rigidbody = GetComponent<Rigidbody>();
+            EnableLogic();
+            if (_despawnType.HasFlag(DespawnType.OnLifetimeEnd))
+            {
+                _despawnCoroutine = StartCoroutine(DespawnOnLifetime(_lifetime));
+            }
         }
         
-        public override bool IsActive()
+        public override void Despawn()
         {
-            return gameObject.activeInHierarchy;
+            if (gameObject.activeInHierarchy)
+            {
+                _rigidbody.velocity = Vector3.zero;
+                _rigidbody.angularVelocity = Vector3.zero;
+                gameObject.SetActive(false);
+            }
+
+            _despawnCoroutine = null;
+        }
+        
+        public IEnumerator DespawnOnLifetime(float lifetime)
+        {
+            yield return new WaitForSeconds(lifetime);
+            Despawn();
         }
 
-        public override void SetActive(bool value)
+        private void OnCollisionEnter(Collision other)
         {
-            gameObject.SetActive(value);
-        }
-
-        public Rigidbody Rigidbody()
-        {
-            return _rigidbody;
+            if (other.gameObject.TryGetComponent(out HealthSystem enemy))
+            {
+                enemy.TakeDamage(this);
+            }
+            Despawn();
         }
     }
 }
