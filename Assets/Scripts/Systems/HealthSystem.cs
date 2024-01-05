@@ -22,7 +22,7 @@ public class HealthSystem : MonoBehaviour, IBeatable
         {
             _currentHealth = value;
             OnHealthChanged?.Invoke(_currentHealth);
-            if (value < 0)
+            if (value <= 0)
             {
                 Die();
             }
