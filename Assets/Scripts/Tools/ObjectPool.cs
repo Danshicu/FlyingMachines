@@ -5,8 +5,19 @@ namespace Tools
 {
    public class ObjectPool : MonoBehaviour
    {
-      [SerializeField] private PoolSettings _settings;
-      private List<Poolable> _pool = new List<Poolable>();
+      private PoolSettings _settings;
+      private List<Poolable> _pool;
+      // public ObjectPool(PoolSettings settings)
+      // {
+      //    _settings = settings;
+      //    _pool = new List<Poolable>();
+      // }
+
+      public void BindSettings(PoolSettings settings)
+      {
+         _settings = settings;
+         _pool = new List<Poolable>();
+      }
       
       public void SpawnItems()
       {
@@ -18,6 +29,7 @@ namespace Tools
 
       private Poolable CreateItem()
       {
+         Debug.Log("Created laser");
          Poolable poolable = (Poolable)GameObject.Instantiate((UnityEngine.Object)((object)_settings.Poolable));
          poolable.SetActive(false);
          return poolable;

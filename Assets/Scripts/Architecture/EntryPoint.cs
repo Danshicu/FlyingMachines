@@ -7,8 +7,8 @@ namespace Architecture
 {
     public class EntryPoint : MonoBehaviour
     {
-        [SerializeField] private List<HealthSystem> _systems;
-        [SerializeField] private HealthBarsManager _manager;
+        //[SerializeField] private List<HealthSystem> _systems;
+        //[SerializeField] private PlayerUISetter _manager;
 
         private void OnEnable()
         {
@@ -25,7 +25,7 @@ namespace Architecture
 
         private void HandlePlayerSpawn(Player player)
         {
-            _manager.AddHealthBar(player.Health);
+            //_manager.AddHealthBar(player.Health);
         }
         
         private void OnDisable()

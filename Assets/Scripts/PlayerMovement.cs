@@ -2,17 +2,21 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
 
 public class PlayerMovement : MonoBehaviour
 {
+    private PlayerInputActions _playerInputActions;
+    
     [Header("Moving")]
     [SerializeField] private float positiveMaxSpeed;
     [SerializeField] private float negativeMaxSpeed;
     [SerializeField] private float speedIncreasingRate;
     [SerializeField] private float speedDecreasingRate;
+    private bool _isMoving;
     
     [Header("Stop moving")]
     [SerializeField] private float dampingSpeedFactor=0.9f;
@@ -27,22 +31,57 @@ public class PlayerMovement : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private float currentSpeed;
     
-    private InputHandler _inputHandler = new InputHandler();
+    //private InputHandler _inputHandler = new InputHandler();
     private Rigidbody _rigidbody;
+    private Vector2 _moveInput;
+    private Vector2 _lookUpInput;
+
+    public void GetInputListener(PlayerInputActions inputActions)
+    {
+        _playerInputActions = inputActions;
+        MakeSubscriptions();
+    }
+
+    private void MakeSubscriptions()
+    {
+        _playerInputActions.InMatchInput.Enable();
+        _playerInputActions.InMatchInput.Movement.performed += ChangeMovingState;
+        _playerInputActions.InMatchInput.Movement.canceled += ChangeMovingState;
+        _playerInputActions.InMatchInput.LookUp.performed += ReadLookUp;
+    }
+
+    private void ReadLookUp(InputAction.CallbackContext context)
+    {
+        //_lookUpInput = context.ReadValue<Vector2>();
+    }
+
+    private void ChangeMovingState(InputAction.CallbackContext context)
+    {
+        if (context.canceled)
+        {
+            _isMoving = false;
+            _moveInput = Vector2.zero;
+            return;
+        }
+        _isMoving = true;
+    }
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
         Cursor.lockState = CursorLockMode.Locked;
     }
-
+    
     private void FixedUpdate()
     {
-        Vector2 moveInput = _inputHandler.MoveInput;
-        ChangeSpeed(moveInput.y);
-        Vector2 mouseInput = _inputHandler.MouseInput;
+        if (_isMoving)
+        {
+            _moveInput = _playerInputActions.InMatchInput.Movement.ReadValue<Vector2>();
+        }
+        ChangeSpeed(_moveInput.y);
+        _lookUpInput = _playerInputActions.InMatchInput.LookUp.ReadValue<Vector2>();
         _rigidbody.AddForce(transform.forward * currentSpeed * forceMultiplayer  * Time.fixedDeltaTime, ForceMode.VelocityChange);
-        _rigidbody.AddRelativeTorque(Vector3.Scale(new Vector3(-mouseInput.y, mouseInput.x, -moveInput.x), rotationSpeed*Time.fixedDeltaTime), ForceMode.VelocityChange);
+        _rigidbody.AddRelativeTorque(Vector3.Scale(new Vector3(-_lookUpInput.y, _lookUpInput.x, -_moveInput.x), rotationSpeed*Time.fixedDeltaTime), ForceMode.VelocityChange);
         
     }
 
